@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - ".github/workflows/build-apk.yml"
+      - "MamadJaderi_Android_Project_ONLINE_BUILD.zip"
 
 jobs:
   build:
@@ -27,14 +28,23 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build APK
-        working-directory: project
+      - name: Install Android SDK 35
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build APK
+        working-directory: project/MamadJaderi_Android_Project_OPT
+        run: |
+          gradle assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: MamadJaderi-APK
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          path: project/MamadJaderi_Android_Project_OPT/app/build/outputs/apk/debug/app-debug.apk
